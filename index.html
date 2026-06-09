@@ -56,18 +56,23 @@
   <main id="main"></main>
 
   <div class="footer-actions">
-    <button id="exportBtn">Backup</button>
-    <label for="importInput" class="footer-import-label">
-      <input id="importInput" type="file" accept="application/json" class="hidden" />
-      <span class="footer-import">Restore</span>
-    </label>
-    <button id="resetBtn">Reset</button>
+    <button id="unlockBtn" class="lock-pill">🔒 View only — tap to unlock editing</button>
+    <div id="ownerTools" class="owner-tools hidden">
+      <button id="exportBtn">Backup</button>
+      <label for="importInput" class="footer-import-label">
+        <input id="importInput" type="file" accept="application/json" class="hidden" />
+        <span class="footer-import">Restore</span>
+      </label>
+      <button id="resetBtn">Reset</button>
+      <button id="lockBtn">🔓 Lock</button>
+    </div>
   </div>
 
   <div class="toast" id="toast"></div>
 
   <script src="data.js"></script>
   <script src="seed.js"></script>
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

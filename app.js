@@ -10,7 +10,12 @@
   "use strict";
 
   const STORE_KEY = "wc2026-stickers-v1";
+  const UNLOCK_KEY = "wc2026-edit";
   const ALBUM = window.ALBUM;
+  const EDIT_HASH = (window.APP_CONFIG || {}).editHash || "";
+
+  // Editing is locked by default (read-only). Unlocked with the password.
+  let editUnlocked = localStorage.getItem(UNLOCK_KEY) === "1";
 
   // ---- State ---------------------------------------------------------------
   let state = applySeed(loadState());
@@ -138,6 +143,7 @@
     html += `<div class="stepper"><button data-act="minus">−</button><button data-act="plus">+</button></div>`;
     el.innerHTML = html;
     el.addEventListener("click", (e) => {
+      if (!editUnlocked) { toast("View only — unlock editing to make changes"); return; }
       const act = e.target.dataset && e.target.dataset.act;
       const cur = getSt(st.num);
       if (act === "plus") { e.stopPropagation(); state[st.num] = { have: true, dupes: cur.dupes + 1 }; }
@@ -403,6 +409,34 @@
     }
   }
 
+  // ---- Edit lock -----------------------------------------------------------
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+    return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+  function applyLockUI() {
+    document.body.classList.toggle("locked", !editUnlocked);
+    document.getElementById("ownerTools").classList.toggle("hidden", !editUnlocked);
+    document.getElementById("unlockBtn").classList.toggle("hidden", editUnlocked);
+  }
+  async function unlock() {
+    const pw = prompt("Enter the edit password:");
+    if (pw == null) return;
+    const ok = EDIT_HASH && (await sha256(pw)) === EDIT_HASH;
+    if (ok) {
+      editUnlocked = true;
+      localStorage.setItem(UNLOCK_KEY, "1");
+      applyLockUI(); render(); toast("Editing unlocked");
+    } else {
+      toast("Wrong password");
+    }
+  }
+  function lock() {
+    editUnlocked = false;
+    localStorage.removeItem(UNLOCK_KEY);
+    applyLockUI(); render(); toast("Locked — view only");
+  }
+
   // ---- Init ----------------------------------------------------------------
   function setThumb(index) {
     const thumb = document.querySelector(".seg-thumb");
@@ -445,7 +479,10 @@
       if (e.target.files[0]) importData(e.target.files[0]);
       e.target.value = "";
     });
+    document.getElementById("unlockBtn").addEventListener("click", unlock);
+    document.getElementById("lockBtn").addEventListener("click", lock);
 
+    applyLockUI();
     syncSeg();
     render();
   }

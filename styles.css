@@ -477,6 +477,15 @@ textarea.paste {
 .footer-import-label { flex: 1; }
 #resetBtn { color: var(--red); }
 
+/* Edit lock */
+.footer-actions > * { flex: 1; }
+.lock-pill { width: 100%; color: var(--muted) !important; }
+.owner-tools { display: flex; gap: 10px; }
+.owner-tools > * { flex: 1; }
+#lockBtn { color: var(--muted); flex: 0 0 auto; min-width: 64px; }
+body.locked .stepper { display: none !important; }
+body.locked .sticker { cursor: default; }
+
 .empty-note {
   color: var(--muted);
   font-size: 0.9rem;
