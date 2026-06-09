@@ -8,24 +8,22 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="WC26 Stickers" />
   <title>World Cup 2026 — Sticker Tracker</title>
-  <link rel="stylesheet" href="styles.css?v=4" />
+  <link rel="stylesheet" href="styles.css?v=5" />
 </head>
 <body>
-  <header>
-    <div class="brandbar">
-      <div class="brand-logos">
-        <img class="logo logo-wc" src="assets/wc2026.png?v=4" alt="FIFA World Cup 2026" />
-        <img class="logo logo-panini" src="assets/panini.jpg?v=4" alt="Panini" />
-      </div>
-      <button id="shareBtn" class="icon-btn" aria-label="Share">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
-             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 15V3M8 7l4-4 4 4" />
-          <path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" />
-        </svg>
-      </button>
-    </div>
+  <!-- FIFA banner across the top -->
+  <div class="hero">
+    <img class="hero-img" src="assets/wc2026.png?v=5" alt="FIFA World Cup 2026" />
+    <button id="shareBtn" class="icon-btn hero-share" aria-label="Share & menu">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 15V3M8 7l4-4 4 4" />
+        <path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" />
+      </svg>
+    </button>
+  </div>
 
+  <header class="controls">
     <h1 id="appTitle">Sticker Tracker</h1>
 
     <div class="progress-wrap">
@@ -60,20 +58,13 @@
 
   <main id="main"></main>
 
-  <div class="footer-actions">
-    <button id="unlockBtn" class="lock-pill">🔒 View only — tap to unlock editing</button>
-    <div id="ownerTools" class="owner-tools hidden">
-      <button id="exportBtn">Backup</button>
-      <label for="importInput" class="footer-import-label">
-        <input id="importInput" type="file" accept="application/json" class="hidden" />
-        <span class="footer-import">Restore</span>
-      </label>
-      <button id="resetBtn">Reset</button>
-      <button id="lockBtn">🔓 Lock</button>
-    </div>
-  </div>
+  <!-- Panini banner footer at the bottom -->
+  <footer class="panini-footer">
+    <img src="assets/panini.jpg?v=5" alt="Panini" />
+    <span class="footer-tag">Sticker Tracker · World Cup 2026</span>
+  </footer>
 
-  <!-- Share sheet -->
+  <!-- Share / menu sheet -->
   <div id="sheet" class="sheet hidden">
     <div class="sheet-backdrop"></div>
     <div class="sheet-card">
@@ -91,6 +82,22 @@
         <span class="si-emoji">✨</span>
         <span><b>Start my own album</b><small>Track your own stickers on this device</small></span>
       </button>
+
+      <div class="sheet-sep"></div>
+
+      <button class="sheet-item" id="unlockBtn">
+        <span class="si-emoji">🔒</span>
+        <span><b>Unlock editing</b><small>Owner only — enter the password</small></span>
+      </button>
+      <div id="ownerTools" class="hidden">
+        <button class="sheet-item" id="exportBtn"><span class="si-emoji">⬇️</span><span><b>Backup</b><small>Save your collection to a file</small></span></button>
+        <label class="sheet-item" for="importInput"><span class="si-emoji">⬆️</span><span><b>Restore</b><small>Load a backup file</small></span>
+          <input id="importInput" type="file" accept="application/json" class="hidden" />
+        </label>
+        <button class="sheet-item" id="lockBtn"><span class="si-emoji">🔓</span><span><b>Lock (view only)</b><small>Turn editing back off</small></span></button>
+        <button class="sheet-item danger" id="resetBtn"><span class="si-emoji">♻️</span><span><b>Reset</b><small>Clear all marks</small></span></button>
+      </div>
+
       <p class="sheet-note">Friends always see a read-only copy — nobody can change your album.</p>
       <button class="sheet-close" id="sheetClose">Close</button>
     </div>
@@ -98,9 +105,9 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="data.js?v=4"></script>
-  <script src="seed.js?v=4"></script>
-  <script src="config.js?v=4"></script>
-  <script src="app.js?v=4"></script>
+  <script src="data.js?v=5"></script>
+  <script src="seed.js?v=5"></script>
+  <script src="config.js?v=5"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>

@@ -428,9 +428,10 @@
   function applyLockUI() {
     document.body.classList.toggle("locked", !editUnlocked);
     document.getElementById("ownerTools").classList.toggle("hidden", !editUnlocked);
-    // In personal mode there's no password gate, so hide the unlock pill + lock btn.
+    // Unlock entry shows only when locked (and not in personal mode).
     document.getElementById("unlockBtn").classList.toggle("hidden", editUnlocked || personalMode);
-    document.getElementById("lockBtn").classList.toggle("hidden", personalMode);
+    // Lock entry shows only when currently unlocked (and not personal).
+    document.getElementById("lockBtn").classList.toggle("hidden", !editUnlocked || personalMode);
   }
   async function unlock() {
     const pw = prompt("Enter the edit password:");
@@ -439,7 +440,7 @@
     if (ok) {
       editUnlocked = true;
       localStorage.setItem(UNLOCK_KEY, "1");
-      applyLockUI(); render(); toast("Editing unlocked");
+      applyLockUI(); render(); closeSheet(); toast("Editing unlocked");
     } else {
       toast("Wrong password");
     }
@@ -447,7 +448,7 @@
   function lock() {
     editUnlocked = false;
     localStorage.removeItem(UNLOCK_KEY);
-    applyLockUI(); render(); toast("Locked — view only");
+    applyLockUI(); render(); closeSheet(); toast("Locked — view only");
   }
 
   // ---- Share / personal mode ----------------------------------------------

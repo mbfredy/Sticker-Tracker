@@ -44,29 +44,40 @@ html, body {
 }
 
 /* ---------- Header ---------- */
-header {
+header.controls {
   position: sticky;
   top: 0;
   z-index: 20;
-  background: rgba(7, 8, 13, 0.72);
+  background: rgba(7, 8, 13, 0.82);
   backdrop-filter: saturate(160%) blur(22px);
   -webkit-backdrop-filter: saturate(160%) blur(22px);
   border-bottom: 1px solid var(--border);
-  padding: calc(8px + env(safe-area-inset-top)) 16px 12px;
+  padding: 12px 16px 12px;
 }
 
-.brandbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 8px;
+/* FIFA hero banner */
+.hero {
+  position: relative;
+  background: #000;
+  padding-top: env(safe-area-inset-top);
 }
-.brand-logos { display: flex; align-items: center; gap: 10px; height: 26px; overflow: hidden; }
-/* Hard cap so the brand images can never blow up regardless of cache state. */
-.brandbar img.logo { width: auto; max-width: 120px; object-fit: contain; display: block; }
-.logo-wc { height: 26px; max-height: 26px; border-radius: 6px; }
-.logo-panini { height: 18px; max-height: 18px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4); }
+.hero-img {
+  display: block; width: 100%; height: 124px;
+  object-fit: cover; object-position: center 42%;
+}
+.hero::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 48px;
+  background: linear-gradient(to top, var(--bg) 10%, transparent);
+  pointer-events: none;
+}
+.hero-share {
+  position: absolute; right: 14px;
+  top: calc(env(safe-area-inset-top) + 12px);
+  z-index: 3;
+  background: rgba(0, 0, 0, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
 
 .icon-btn {
   width: 38px; height: 38px;
@@ -82,10 +93,10 @@ header {
 .icon-btn:active { transform: scale(0.92); background: var(--panel-press); }
 
 h1 {
-  font-size: 1.7rem;
+  font-size: 1.25rem;
   margin: 0 0 12px;
   font-weight: 800;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
   background: var(--grad);
   -webkit-background-clip: text;
   background-clip: text;
@@ -235,7 +246,7 @@ h1 {
 }
 
 /* ---------- Main ---------- */
-main { padding: 8px 16px 120px; max-width: 760px; margin: 0 auto; }
+main { padding: 8px 16px 24px; max-width: 760px; margin: 0 auto; min-height: 40vh; }
 
 .group { margin-top: 22px; scroll-margin-top: 90px; }
 .group-title {
@@ -358,28 +369,22 @@ textarea.paste:focus { border-color: var(--border-2); }
 .tally .get .tnum { color: var(--green); }
 .tally .give .tnum { color: var(--blue); }
 
-/* ---------- Footer ---------- */
-.footer-actions {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  display: flex; gap: 10px;
-  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-  background: rgba(7, 8, 13, 0.8);
-  backdrop-filter: saturate(160%) blur(22px); -webkit-backdrop-filter: saturate(160%) blur(22px);
-  border-top: 1px solid var(--border); z-index: 15;
+/* ---------- Panini footer ---------- */
+.panini-footer {
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  background: #000;
+  text-align: center;
+  padding: 16px 16px calc(18px + env(safe-area-inset-bottom));
 }
-.footer-actions > * { flex: 1; }
-.footer-actions button, .footer-import {
-  display: block; width: 100%; text-align: center;
-  background: var(--panel-2); color: var(--text);
-  border: 1px solid var(--border); border-radius: var(--radius-sm);
-  padding: 12px; font-size: 0.86rem; font-weight: 600; cursor: pointer;
+.panini-footer img {
+  display: block; width: 100%; max-width: 420px; height: 44px;
+  object-fit: contain; object-position: center; margin: 0 auto;
 }
-.lock-pill { width: 100%; color: var(--muted) !important; }
-.owner-tools { display: flex; gap: 10px; }
-.owner-tools > * { flex: 1; }
-#lockBtn { color: var(--muted); flex: 0 0 auto; min-width: 66px; }
-#resetBtn { color: var(--red); }
-.footer-import-label { flex: 1; }
+.footer-tag {
+  display: block; margin-top: 10px; font-size: 0.68rem;
+  color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase;
+}
 
 /* ---------- Share sheet ---------- */
 .sheet { position: fixed; inset: 0; z-index: 40; }
@@ -404,6 +409,8 @@ textarea.paste:focus { border-color: var(--border-2); }
   padding: 13px 15px; margin-bottom: 10px; cursor: pointer;
 }
 .sheet-item.primary { background: var(--grad-soft); border-color: var(--border-2); }
+.sheet-item.danger b { color: var(--red); }
+.sheet-sep { height: 1px; background: var(--border); margin: 8px 0 12px; }
 .sheet-item .si-emoji { font-size: 1.3rem; }
 .sheet-item b { display: block; font-size: 0.95rem; }
 .sheet-item small { color: var(--muted); font-size: 0.78rem; }
@@ -417,6 +424,6 @@ textarea.paste:focus { border-color: var(--border-2); }
   position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%);
   background: rgba(20, 22, 30, 0.96); border: 1px solid var(--border-2); color: #fff;
   padding: 11px 18px; border-radius: 999px; font-size: 0.85rem;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 50;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 60;
 }
 .toast.show { opacity: 1; }
