@@ -56,6 +56,7 @@
   let compareMode = "have"; // friend's pasted list is what they HAVE or NEED
   let pressTimer = null;     // long-press timer for spares
   let suppressClickUntil = 0; // guard so a long-press doesn't also fire a tap
+  const expandedTeams = new Set(); // which team rows the user has opened
 
   // ---- Indexes (built once) ------------------------------------------------
   const ALL = [];                 // every sticker with context
@@ -185,7 +186,11 @@
     const el = document.createElement("div");
     el.className = "cell " + (s.have ? (s.dupes > 0 ? "owned dupe" : "owned") : "missing") +
       (highlight ? " highlight" : "");
-    el.innerHTML = `<span class="cn">${st.num.split(" ").pop()}</span>` +
+    const parts = st.num.split(" ");
+    const prefix = parts.length > 1 ? parts[0] : "";
+    const numTxt = parts[parts.length - 1];
+    el.innerHTML = (prefix ? `<span class="cp">${prefix}</span>` : "") +
+      `<span class="cn">${numTxt}</span>` +
       (s.dupes > 0 ? `<span class="cd">${s.dupes}</span>` : "");
     if (editUnlocked) attachCellHandlers(el, st.num);
     return el;
@@ -229,14 +234,19 @@
     const total = all.length;
     const have = all.filter((st) => getSt(st.num).have).length;
     const pct = total ? Math.round((have / total) * 100) : 0;
+    const id = (team.group || "") + "|" + team.name;
 
     // Which stickers to show.
     let list = all;
     if (opts.filterFn) list = all.filter(opts.filterFn);
     if (!list.length && !opts.alwaysShow) return null;
 
+    // Collapsed unless: searched (alwaysShow), a filter expanded it, or the
+    // user opened it (remembered across re-renders so taps don't close it).
+    const collapsed = !opts.alwaysShow && opts.collapsed && !expandedTeams.has(id);
+
     const card = document.createElement("div");
-    card.className = "country" + (opts.collapsed ? " collapsed" : "");
+    card.className = "country" + (collapsed ? " collapsed" : "");
 
     const head = document.createElement("div");
     head.className = "country-head";
@@ -246,7 +256,11 @@
       `<span class="country-count">${have}/${total}</span>` +
       `<span class="mini-bar"><span class="mini-fill" style="width:${pct}%"></span></span>` +
       `<span class="caret">▼</span>`;
-    head.addEventListener("click", () => card.classList.toggle("collapsed"));
+    head.addEventListener("click", () => {
+      card.classList.toggle("collapsed");
+      if (card.classList.contains("collapsed")) expandedTeams.delete(id);
+      else expandedTeams.add(id);
+    });
     card.appendChild(head);
 
     const grid = document.createElement("div");
