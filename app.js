@@ -175,7 +175,7 @@
     const head = document.createElement("div");
     head.className = "country-head";
     head.innerHTML =
-      `<span class="flag">${flagEmoji(team.code)}</span>` +
+      `<span class="flag">${team.flag || flagEmoji(team.code)}</span>` +
       `<span class="country-name">${team.name}</span>` +
       `<span class="country-count">${have}/${total}</span>` +
       `<span class="mini-bar"><span class="mini-fill" style="width:${pct}%"></span></span>` +
