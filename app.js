@@ -13,6 +13,7 @@
   const MINE_KEY = "wc2026-mine-v1";       // a visitor's own blank album
   const UNLOCK_KEY = "wc2026-edit";
   const PERSONAL_KEY = "wc2026-personal";
+  const SEEDV_KEY = "wc2026-seedv";        // which seed version is applied here
   const ALBUM = window.ALBUM;
   const EDIT_HASH = (window.APP_CONFIG || {}).editHash || "";
 
@@ -30,14 +31,20 @@
   function saveState() { localStorage.setItem(storeKey(), JSON.stringify(state)); }
   function getSt(num) { return state[num] || { have: false, dupes: 0 }; }
 
-  // First-run (owner mode only): pre-fill from photos for untouched stickers.
+  // Owner mode: apply the published collection (seed) read from photos + the
+  // owner's duplicates. Versioned — when a newer seed is published the entries
+  // refresh on the device; once applied it leaves the owner's state alone so
+  // their own taps persist between updates.
   function applySeed(st) {
     const seed = window.SEED || {};
-    let changed = false;
+    const ver = window.SEED_VERSION || 1;
+    const applied = +(localStorage.getItem(SEEDV_KEY) || 0);
+    if (applied >= ver) return st; // already up to date
     for (const num in seed) {
-      if (!(num in st)) { st[num] = seed[num]; changed = true; }
+      st[num] = { have: !!seed[num].have, dupes: seed[num].dupes || 0 };
     }
-    if (changed) localStorage.setItem(storeKey(), JSON.stringify(st));
+    localStorage.setItem(storeKey(), JSON.stringify(st));
+    localStorage.setItem(SEEDV_KEY, String(ver));
     return st;
   }
 
