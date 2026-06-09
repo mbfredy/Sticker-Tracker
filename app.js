@@ -9,38 +9,44 @@
 (function () {
   "use strict";
 
-  const STORE_KEY = "wc2026-stickers-v1";
+  const OWNER_KEY = "wc2026-stickers-v1";  // the owner's (seeded) collection
+  const MINE_KEY = "wc2026-mine-v1";       // a visitor's own blank album
   const UNLOCK_KEY = "wc2026-edit";
+  const PERSONAL_KEY = "wc2026-personal";
   const ALBUM = window.ALBUM;
   const EDIT_HASH = (window.APP_CONFIG || {}).editHash || "";
 
-  // Editing is locked by default (read-only). Unlocked with the password.
-  let editUnlocked = localStorage.getItem(UNLOCK_KEY) === "1";
+  // Personal mode = the visitor is keeping their OWN blank album on this device
+  // (separate storage, no seed, freely editable). Otherwise it's the owner's
+  // shared collection: read-only until unlocked with the password.
+  let personalMode = localStorage.getItem(PERSONAL_KEY) === "1";
+  let editUnlocked = personalMode ? true : localStorage.getItem(UNLOCK_KEY) === "1";
 
-  // ---- State ---------------------------------------------------------------
-  let state = applySeed(loadState());
-  let filter = "all";       // all | missing | dupes
-  let query = "";
-  let view = "album";       // album | trade | compare
-  let compareMode = "have"; // friend's pasted list is what they HAVE or NEED
-
+  function storeKey() { return personalMode ? MINE_KEY : OWNER_KEY; }
   function loadState() {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+    try { return JSON.parse(localStorage.getItem(storeKey())) || {}; }
     catch { return {}; }
   }
-  function saveState() { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+  function saveState() { localStorage.setItem(storeKey(), JSON.stringify(state)); }
   function getSt(num) { return state[num] || { have: false, dupes: 0 }; }
 
-  // First-run: pre-fill from photos, only for stickers not yet touched.
+  // First-run (owner mode only): pre-fill from photos for untouched stickers.
   function applySeed(st) {
     const seed = window.SEED || {};
     let changed = false;
     for (const num in seed) {
       if (!(num in st)) { st[num] = seed[num]; changed = true; }
     }
-    if (changed) localStorage.setItem(STORE_KEY, JSON.stringify(st));
+    if (changed) localStorage.setItem(storeKey(), JSON.stringify(st));
     return st;
   }
+
+  // ---- State ---------------------------------------------------------------
+  let state = personalMode ? loadState() : applySeed(loadState());
+  let filter = "all";       // all | missing | dupes
+  let query = "";
+  let view = "album";       // album | trade | compare
+  let compareMode = "have"; // friend's pasted list is what they HAVE or NEED
 
   // ---- Indexes (built once) ------------------------------------------------
   const ALL = [];                 // every sticker with context
@@ -138,20 +144,25 @@
     const s = getSt(st.num);
     const el = document.createElement("div");
     el.className = "sticker" + (s.have ? " have" : "") + (highlight ? " highlight" : "");
-    let html = `<div class="num">${st.num}</div><div class="nm">${st.name || ""}</div>`;
+    let html = `<div class="num">${st.num}</div>`;
+    if (st.name) html += `<div class="nm">${st.name}</div>`;
     if (s.dupes > 0) html += `<div class="dupe-badge">+${s.dupes}</div>`;
-    html += `<div class="stepper"><button data-act="minus">−</button><button data-act="plus">+</button></div>`;
+    // Edit controls only exist when editing is unlocked — viewers get nothing.
+    if (editUnlocked) {
+      html += `<div class="stepper"><button data-act="minus">−</button><button data-act="plus">+</button></div>`;
+    }
     el.innerHTML = html;
-    el.addEventListener("click", (e) => {
-      if (!editUnlocked) { toast("View only — unlock editing to make changes"); return; }
-      const act = e.target.dataset && e.target.dataset.act;
-      const cur = getSt(st.num);
-      if (act === "plus") { e.stopPropagation(); state[st.num] = { have: true, dupes: cur.dupes + 1 }; }
-      else if (act === "minus") { e.stopPropagation(); state[st.num] = { have: true, dupes: Math.max(0, cur.dupes - 1) }; }
-      else { state[st.num] = cur.have ? { have: false, dupes: 0 } : { have: true, dupes: 0 }; }
-      saveState();
-      render();
-    });
+    if (editUnlocked) {
+      el.addEventListener("click", (e) => {
+        const act = e.target.dataset && e.target.dataset.act;
+        const cur = getSt(st.num);
+        if (act === "plus") { e.stopPropagation(); state[st.num] = { have: true, dupes: cur.dupes + 1 }; }
+        else if (act === "minus") { e.stopPropagation(); state[st.num] = { have: true, dupes: Math.max(0, cur.dupes - 1) }; }
+        else { state[st.num] = cur.have ? { have: false, dupes: 0 } : { have: true, dupes: 0 }; }
+        saveState();
+        render();
+      });
+    }
     return el;
   }
 
@@ -417,7 +428,9 @@
   function applyLockUI() {
     document.body.classList.toggle("locked", !editUnlocked);
     document.getElementById("ownerTools").classList.toggle("hidden", !editUnlocked);
-    document.getElementById("unlockBtn").classList.toggle("hidden", editUnlocked);
+    // In personal mode there's no password gate, so hide the unlock pill + lock btn.
+    document.getElementById("unlockBtn").classList.toggle("hidden", editUnlocked || personalMode);
+    document.getElementById("lockBtn").classList.toggle("hidden", personalMode);
   }
   async function unlock() {
     const pw = prompt("Enter the edit password:");
@@ -435,6 +448,58 @@
     editUnlocked = false;
     localStorage.removeItem(UNLOCK_KEY);
     applyLockUI(); render(); toast("Locked — view only");
+  }
+
+  // ---- Share / personal mode ----------------------------------------------
+  function appUrl() { return location.origin + location.pathname; }
+
+  async function shareApp() {
+    const url = appUrl();
+    const text = "Check out my World Cup 2026 Panini sticker collection — see what I've got and compare yours to find trades ⚽";
+    closeSheet();
+    if (navigator.share) {
+      try { await navigator.share({ title: "WC2026 Sticker Tracker", text, url }); }
+      catch (e) { /* user cancelled */ }
+    } else {
+      try { await navigator.clipboard.writeText(text + " " + url); toast("Link copied"); }
+      catch (e) { toast(url); }
+    }
+  }
+
+  function copyMyList() {
+    const haves = ALL.filter((s) => getSt(s.num).have).map((s) => s.num);
+    closeSheet();
+    if (!haves.length) { toast("No stickers marked yet"); return; }
+    navigator.clipboard.writeText(haves.join(", "))
+      .then(() => toast(`Copied your ${haves.length} stickers`));
+  }
+
+  function startPersonal() {
+    closeSheet();
+    if (personalMode) { toast("You're already on your own album"); return; }
+    if (confirm("Start your OWN blank album on this device?\n\nYou'll track your own stickers and can switch back to the shared view anytime.")) {
+      localStorage.setItem(PERSONAL_KEY, "1");
+      location.reload();
+    }
+  }
+  function exitPersonal() {
+    localStorage.removeItem(PERSONAL_KEY);
+    location.reload();
+  }
+
+  function openSheet() { document.getElementById("sheet").classList.remove("hidden"); }
+  function closeSheet() { document.getElementById("sheet").classList.add("hidden"); }
+
+  function updateModeBanner() {
+    const b = document.getElementById("modeBanner");
+    if (personalMode) {
+      b.className = "mode-banner";
+      b.innerHTML = `✨ Your own album · <button class="link" id="exitMine">switch to shared view</button>`;
+      b.querySelector("#exitMine").addEventListener("click", exitPersonal);
+    } else {
+      b.className = "mode-banner hidden";
+      b.innerHTML = "";
+    }
   }
 
   // ---- Init ----------------------------------------------------------------
@@ -482,6 +547,15 @@
     document.getElementById("unlockBtn").addEventListener("click", unlock);
     document.getElementById("lockBtn").addEventListener("click", lock);
 
+    // Share sheet + personal mode
+    document.getElementById("shareBtn").addEventListener("click", openSheet);
+    document.getElementById("sheetClose").addEventListener("click", closeSheet);
+    document.querySelector("#sheet .sheet-backdrop").addEventListener("click", closeSheet);
+    document.getElementById("shareLink").addEventListener("click", shareApp);
+    document.getElementById("copyList").addEventListener("click", copyMyList);
+    document.getElementById("startMine").addEventListener("click", startPersonal);
+
+    updateModeBanner();
     applyLockUI();
     syncSeg();
     render();
