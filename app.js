@@ -124,7 +124,6 @@
   const elSearchResult = document.getElementById("searchResult");
 
   function render() {
-    updateProgress();
     elNav.classList.toggle("hidden", view !== "album");
     elFilters.classList.toggle("hidden", view !== "album");
     if (view === "trade") { elSearchResult.classList.add("hidden"); renderTrade(); }
@@ -132,13 +131,42 @@
     else renderAlbum();
   }
 
-  function updateProgress() {
+  function computeStats() {
+    let have = 0, spares = 0;
+    ALL.forEach((s) => { const st = getSt(s.num); if (st.have) have++; if (st.dupes > 0) spares += st.dupes; });
     const total = ALL.length;
-    const have = ALL.filter((s) => getSt(s.num).have).length;
-    const pct = total ? Math.round((have / total) * 100) : 0;
-    document.getElementById("progressFill").style.width = pct + "%";
-    document.getElementById("progressLabel").innerHTML =
-      `<span>${have} of ${total} collected</span><span>${pct}%</span>`;
+    return { total, have, missing: total - have, spares, pct: total ? Math.round((have / total) * 100) : 0 };
+  }
+
+  // Big completion ring + headline stats at the top of the album.
+  function buildDashboard() {
+    const s = computeStats();
+    const r = 42, circ = 2 * Math.PI * r, off = circ * (1 - s.pct / 100);
+    const d = document.createElement("div");
+    d.className = "dashboard";
+    d.innerHTML =
+      `<div class="ring">` +
+        `<svg viewBox="0 0 96 96">` +
+          `<defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">` +
+            `<stop offset="0" stop-color="#ff3d8b"/><stop offset="0.5" stop-color="#4d8bff"/><stop offset="1" stop-color="#1fc46a"/>` +
+          `</linearGradient></defs>` +
+          `<circle class="ring-bg" cx="48" cy="48" r="${r}"></circle>` +
+          `<circle class="ring-fg" cx="48" cy="48" r="${r}" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"></circle>` +
+        `</svg>` +
+        `<div class="ring-label"><b>${s.pct}%</b><span>complete</span></div>` +
+      `</div>` +
+      `<div class="dash-stats">` +
+        `<div class="ds collected"><b>${s.have}</b><span>collected</span></div>` +
+        `<div class="ds missing"><b>${s.missing}</b><span>missing</span></div>` +
+        `<div class="ds spares"><b>${s.spares}</b><span>spares</span></div>` +
+      `</div>`;
+    return d;
+  }
+  function wrapCard(card) {
+    const gc = document.createElement("div");
+    gc.className = "group-card";
+    if (card) gc.appendChild(card);
+    return gc;
   }
 
   // -- Album --
@@ -238,6 +266,7 @@
 
   function renderAlbum() {
     elMain.innerHTML = "";
+    elMain.appendChild(buildDashboard());
     const res = resolveSearch(query);
 
     // Search banner for an exact code.
@@ -254,42 +283,54 @@
       elSearchResult.classList.add("hidden");
     }
 
-    // Specific code -> just that country, full list, highlighted.
+    // Specific code -> just that country (expanded), highlighted.
     if (res.type === "sticker") {
       const c = COUNTRIES.find((x) => x.name === res.entry.country);
-      if (c) elMain.appendChild(countryCard(teamWithFlag(c.team, c.group), { alwaysShow: true, highlight: res.entry.num }));
+      if (c) elMain.appendChild(wrapCard(countryCard(teamWithFlag(c.team, c.group), { alwaysShow: true, highlight: res.entry.num })));
+      buildNav();
       return;
     }
-    // Country -> just that country, full list.
+    // Country -> just that country, expanded.
     if (res.type === "country") {
       const c = res.country;
-      elMain.appendChild(countryCard(teamWithFlag(c.team, c.group), { alwaysShow: true }));
+      elMain.appendChild(wrapCard(countryCard(teamWithFlag(c.team, c.group), { alwaysShow: true })));
+      buildNav();
       return;
     }
 
-    // Generic filter / no query -> grouped view.
+    // Grouped overview. Rows collapse when showing everything; expand when a
+    // filter is active so the matching numbers are visible.
     const ql = res.type === "filter" ? res.q : "";
+    const collapsed = filter === "all" && !ql;
     const filterFn = (st) => {
       if (!passesFilter(st.num)) return false;
       if (!ql) return true;
       return norm(st.num).includes(norm(ql)) || (st.name || "").toLowerCase().includes(ql);
     };
 
+    let any = false;
     (ALBUM.groups || []).forEach((g) => {
       const cards = (g.teams || [])
-        .map((t) => countryCard(teamWithFlag(t, g.id), { filterFn }))
+        .map((t) => countryCard(teamWithFlag(t, g.id), { filterFn, collapsed }))
         .filter(Boolean);
       if (!cards.length) return;
+      any = true;
       const wrap = document.createElement("div");
       wrap.className = "group";
       wrap.id = "group-" + g.id;
       wrap.innerHTML = `<div class="group-title">${g.label || "Group " + g.id}</div>`;
-      cards.forEach((c) => wrap.appendChild(c));
+      const gc = document.createElement("div");
+      gc.className = "group-card";
+      cards.forEach((c) => gc.appendChild(c));
+      wrap.appendChild(gc);
       elMain.appendChild(wrap);
     });
 
-    if (!elMain.children.length) {
-      elMain.innerHTML = `<div class="empty-note">No stickers match this search/filter.</div>`;
+    if (!any) {
+      const note = document.createElement("div");
+      note.className = "empty-note";
+      note.textContent = "No stickers match this search/filter.";
+      elMain.appendChild(note);
     }
     buildNav();
   }
