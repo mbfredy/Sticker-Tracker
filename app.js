@@ -54,6 +54,8 @@
   let query = "";
   let view = "album";       // album | trade | compare
   let compareMode = "have"; // friend's pasted list is what they HAVE or NEED
+  let pressTimer = null;     // long-press timer for spares
+  let suppressClickUntil = 0; // guard so a long-press doesn't also fire a tap
 
   // ---- Indexes (built once) ------------------------------------------------
   const ALL = [];                 // every sticker with context
@@ -147,30 +149,50 @@
     return true;
   }
 
+  // A compact number cell (Figuritas-style). Shows just the sticker number;
+  // colour shows state: missing / owned / owned+spares. Tap toggles owned,
+  // long-press cycles the number of spares (0→1→2→3→4→0).
   function stickerEl(st, highlight) {
     const s = getSt(st.num);
     const el = document.createElement("div");
-    el.className = "sticker" + (s.have ? " have" : "") + (highlight ? " highlight" : "");
-    let html = `<div class="num">${st.num}</div>`;
-    if (st.name) html += `<div class="nm">${st.name}</div>`;
-    if (s.dupes > 0) html += `<div class="dupe-badge">+${s.dupes}</div>`;
-    // Edit controls only exist when editing is unlocked — viewers get nothing.
-    if (editUnlocked) {
-      html += `<div class="stepper"><button data-act="minus">−</button><button data-act="plus">+</button></div>`;
-    }
-    el.innerHTML = html;
-    if (editUnlocked) {
-      el.addEventListener("click", (e) => {
-        const act = e.target.dataset && e.target.dataset.act;
-        const cur = getSt(st.num);
-        if (act === "plus") { e.stopPropagation(); state[st.num] = { have: true, dupes: cur.dupes + 1 }; }
-        else if (act === "minus") { e.stopPropagation(); state[st.num] = { have: true, dupes: Math.max(0, cur.dupes - 1) }; }
-        else { state[st.num] = cur.have ? { have: false, dupes: 0 } : { have: true, dupes: 0 }; }
-        saveState();
-        render();
-      });
-    }
+    el.className = "cell " + (s.have ? (s.dupes > 0 ? "owned dupe" : "owned") : "missing") +
+      (highlight ? " highlight" : "");
+    el.innerHTML = `<span class="cn">${st.num.split(" ").pop()}</span>` +
+      (s.dupes > 0 ? `<span class="cd">${s.dupes}</span>` : "");
+    if (editUnlocked) attachCellHandlers(el, st.num);
     return el;
+  }
+
+  function attachCellHandlers(el, num) {
+    const startPress = () => {
+      clearTimeout(pressTimer);
+      pressTimer = setTimeout(() => { suppressClickUntil = Date.now() + 700; cycleSpare(num); }, 450);
+    };
+    const endPress = () => clearTimeout(pressTimer);
+    el.addEventListener("click", () => {
+      if (Date.now() < suppressClickUntil) return; // ignore the tap that follows a long-press
+      toggleOwned(num);
+    });
+    el.addEventListener("touchstart", startPress, { passive: true });
+    el.addEventListener("touchend", endPress);
+    el.addEventListener("touchmove", endPress);
+    el.addEventListener("touchcancel", endPress);
+    el.addEventListener("mousedown", startPress);
+    el.addEventListener("mouseup", endPress);
+    el.addEventListener("mouseleave", endPress);
+    el.addEventListener("contextmenu", (e) => e.preventDefault());
+  }
+  function toggleOwned(num) {
+    const c = getSt(num);
+    state[num] = c.have ? { have: false, dupes: 0 } : { have: true, dupes: 0 };
+    saveState(); render();
+  }
+  function cycleSpare(num) {
+    const c = getSt(num);
+    const d = ((c.dupes || 0) + 1) % 5;
+    state[num] = { have: true, dupes: d };
+    saveState(); render();
+    toast(d ? "Spare ×" + d : "Spares cleared");
   }
 
   function countryCard(team, opts) {

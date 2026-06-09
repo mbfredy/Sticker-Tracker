@@ -207,7 +207,7 @@ h1 {
 }
 
 /* ---------- Filter chips ---------- */
-.filters { display: flex; gap: 8px; }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; row-gap: 8px; align-items: center; }
 .chip-btn {
   background: var(--panel-2); border: 1px solid var(--border);
   color: var(--muted); border-radius: 999px;
@@ -275,49 +275,52 @@ main { padding: 8px 16px 24px; max-width: 760px; margin: 0 auto; min-height: 40v
 .country.collapsed .caret { transform: rotate(-90deg); }
 .country.collapsed .stickers { display: none; }
 
+/* Dense number grid (Figuritas-style) */
 .stickers {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 9px; padding: 4px 14px 16px;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 7px; padding: 6px 14px 16px;
 }
-.sticker {
+.cell {
   position: relative;
-  background: var(--panel-2);
+  aspect-ratio: 1 / 1;
+  display: grid; place-items: center;
   border: 1px solid var(--border);
-  border-radius: 13px;
-  padding: 10px 6px; text-align: center;
-  cursor: pointer; min-height: 54px;
-  display: flex; flex-direction: column; justify-content: center;
-  transition: transform 0.07s, border-color 0.15s, background 0.15s;
-}
-.sticker:active { transform: scale(0.94); }
-.sticker .num {
-  font-weight: 700; font-size: 0.85rem; letter-spacing: 0.3px;
+  border-radius: 10px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 700; font-size: 0.92rem;
+  cursor: pointer; user-select: none; -webkit-user-select: none;
+  transition: transform 0.06s, background 0.12s, border-color 0.12s;
 }
-.sticker .nm { font-size: 0.62rem; color: var(--muted); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sticker.have {
-  background: var(--green-dim);
-  border-color: rgba(31, 224, 122, 0.45);
-  box-shadow: inset 0 0 18px rgba(31, 224, 122, 0.08), 0 0 10px rgba(31, 224, 122, 0.10);
+.cell:active { transform: scale(0.9); }
+.cell.missing { background: var(--panel-2); color: var(--muted); }
+.cell.owned {
+  background: var(--green-dim); color: var(--green);
+  border-color: rgba(31, 224, 122, 0.5);
+  box-shadow: inset 0 0 14px rgba(31, 224, 122, 0.08);
 }
-.sticker.have .num { color: var(--green); }
-.sticker.highlight { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(77, 139, 255, 0.3); }
-
-.dupe-badge {
-  position: absolute; top: -7px; right: -7px;
+.cell.owned.dupe {
+  background: rgba(255, 176, 32, 0.16); color: var(--amber);
+  border-color: rgba(255, 176, 32, 0.55);
+}
+.cell .cd {
+  position: absolute; top: -6px; right: -6px;
   background: var(--amber); color: #1a1200;
-  font-size: 0.66rem; font-weight: 800; border-radius: 999px;
-  padding: 1px 6px; border: 2px solid var(--bg);
+  font-size: 0.6rem; font-weight: 800; border-radius: 999px;
+  padding: 0 5px; border: 2px solid var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
-.stepper { display: flex; gap: 7px; justify-content: center; margin-top: 7px; }
-.stepper button {
-  width: 22px; height: 22px; border-radius: 7px; border: none;
-  background: rgba(31, 224, 122, 0.18); color: var(--green);
-  font-size: 0.95rem; line-height: 1; cursor: pointer; font-weight: 800;
-}
-body.locked .sticker { cursor: default; }
-body.locked .sticker:active { transform: none; }
+.cell.highlight { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(77, 139, 255, 0.3); }
+body.locked .cell { cursor: default; }
+body.locked .cell:active { transform: none; }
+
+/* Legend */
+.legend { display: flex; gap: 12px; align-items: center; margin-left: auto; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; font-size: 0.68rem; color: var(--muted); }
+.legend .dot { width: 9px; height: 9px; border-radius: 3px; display: inline-block; }
+.legend .dot.owned { background: var(--green); }
+.legend .dot.dupe { background: var(--amber); }
+.legend .dot.missing { background: var(--panel-press); border: 1px solid var(--border-2); }
 
 /* ---------- Trade & Compare ---------- */
 .panel {
