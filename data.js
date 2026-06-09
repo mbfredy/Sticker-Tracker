@@ -111,6 +111,14 @@ const ALBUM = {
       team("GHA", "GH", "Ghana"),
       team("PAN", "PA", "Panama"),
     ] },
+    // Special / foil stickers (FWC). Their own page in the album — being
+    // filled in as we learn them; add the full set from the special page.
+    { id: "S", label: "Special Stickers", teams: [
+      { code: "", name: "FIFA World Cup — Special (FWC)", flag: "🏆", stickers: [
+        { num: "FWC 3", name: "", type: "special" },
+        { num: "FWC 16", name: "", type: "special" },
+      ] },
+    ] },
   ],
 };
 

@@ -261,7 +261,7 @@
       const wrap = document.createElement("div");
       wrap.className = "group";
       wrap.id = "group-" + g.id;
-      wrap.innerHTML = `<div class="group-title">Group ${g.id}</div>`;
+      wrap.innerHTML = `<div class="group-title">${g.label || "Group " + g.id}</div>`;
       cards.forEach((c) => wrap.appendChild(c));
       elMain.appendChild(wrap);
     });
