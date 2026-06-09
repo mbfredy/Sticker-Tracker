@@ -3,33 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0f1216" />
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="WC26 Stickers" />
   <title>World Cup 2026 — Sticker Tracker</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
-    <div class="title-row">
-      <h1 id="appTitle">World Cup 2026 — Sticker Tracker</h1>
+    <div class="brandbar">
+      <div class="brand brand-wc" aria-label="FIFA World Cup 2026">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+          <path fill="currentColor" d="M6 3h12v2h3v3a4 4 0 0 1-4 4h-.4A6 6 0 0 1 13 15.9V18h3v2H8v-2h3v-2.1A6 6 0 0 1 7.4 12H7a4 4 0 0 1-4-4V5h3V3zm0 4H5v1a2 2 0 0 0 1 1.7V7zm13 0h-1v2.7A2 2 0 0 0 19 8V7z"/>
+        </svg>
+        <span>World&nbsp;Cup <b>26</b></span>
+      </div>
+      <div class="brand brand-panini" aria-label="Panini">Panini</div>
     </div>
+
+    <h1 id="appTitle">Sticker Album Tracker</h1>
 
     <div class="progress-wrap">
       <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
       <div class="progress-label" id="progressLabel"></div>
     </div>
 
-    <div class="controls">
-      <input id="search" class="search" type="search" placeholder="Search number, player or country…" />
-      <div class="filters">
-        <button class="chip-btn active" data-filter="all">All</button>
-        <button class="chip-btn" data-filter="missing">Missing</button>
-        <button class="chip-btn" data-filter="dupes">Spares</button>
-      </div>
+    <div class="search-wrap">
+      <span class="search-icon" aria-hidden="true">⌕</span>
+      <input id="search" class="search" type="search" inputmode="search"
+             placeholder="Search e.g. mex12, Brazil, 12" autocomplete="off" />
+      <button id="searchClear" class="search-clear" aria-label="Clear search">×</button>
+    </div>
+    <div id="searchResult" class="search-result hidden"></div>
+
+    <div class="segmented" role="tablist">
+      <button class="seg active" data-view="album" role="tab">Album</button>
+      <button class="seg" data-view="trade" role="tab">Trade</button>
+      <button class="seg" data-view="compare" role="tab">Compare</button>
+      <span class="seg-thumb" aria-hidden="true"></span>
     </div>
 
-    <div class="tabs">
-      <button class="tab active" data-view="album">📖 Album</button>
-      <button class="tab" data-view="trade">🤝 Trade</button>
+    <div class="filters" id="filters">
+      <button class="chip-btn active" data-filter="all">All</button>
+      <button class="chip-btn" data-filter="missing">Missing</button>
+      <button class="chip-btn" data-filter="dupes">Spares</button>
     </div>
   </header>
 
@@ -38,12 +56,12 @@
   <main id="main"></main>
 
   <div class="footer-actions">
-    <button id="exportBtn">⬇️ Backup</button>
-    <label for="importInput" style="flex:1">
+    <button id="exportBtn">Backup</button>
+    <label for="importInput" class="footer-import-label">
       <input id="importInput" type="file" accept="application/json" class="hidden" />
-      <span class="footer-import" style="display:block;text-align:center;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px;font-weight:600;font-size:0.82rem;cursor:pointer">⬆️ Restore</span>
+      <span class="footer-import">Restore</span>
     </label>
-    <button id="resetBtn">♻️ Reset</button>
+    <button id="resetBtn">Reset</button>
   </div>
 
   <div class="toast" id="toast"></div>

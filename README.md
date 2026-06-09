@@ -6,17 +6,32 @@ organized by group (A–L) and country.
 
 ## Features
 
-- 📖 **Album view** — every sticker, grouped by Group → Country.
+- 📖 **Album view** — every sticker, grouped by Group → Country, iOS-style cards.
 - 👆 **Tap to update** — tap a sticker to cycle **Missing → Have**. When you
   have it, use **+ / −** to count your **spare duplicates**.
+- 🔎 **Smart search** — type `mex12` and a banner instantly tells you whether
+  you have it, and pulls up Mexico's full list. Also search by country name or
+  by number.
 - 🤝 **Trade view** — auto-generates two copy-paste lists:
   - *Stickers I need* (your wishlist)
   - *My spares to trade* (your duplicates, with quantities)
+- 🤝 **Compare view** — a friend pastes their list (any format) and the app
+  shows the two-way trade: what you can **get** (they have / you're missing)
+  and what you can **give** (you have / they're missing), each copyable.
+  Comparing never changes your album.
 - 📊 **Progress bars** per team and overall.
-- 🔎 **Search** by sticker number, player name, or country.
 - 🔁 **Filters** — All / Missing / Spares.
+- 🍏 **Apple aesthetic** — system font, segmented control, light/dark auto.
 - 💾 **Saves on your device** (localStorage) + **Backup / Restore** as a JSON
   file so you can move it between phones or keep it safe.
+
+## Sharing
+
+Send anyone the URL. Everyone's checkmarks live on their own device, so others
+can browse your album and use **Compare** without touching your collection.
+
+> The header shows stylized World Cup '26 and Panini marks. To use the official
+> logos, drop PNGs into an `assets/` folder and swap the markup in the header.
 
 ## How to use it
 
