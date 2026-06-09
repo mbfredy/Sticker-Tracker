@@ -135,13 +135,13 @@ main { padding: 4px 16px 24px; max-width: 760px; margin: 0 auto; min-height: 40v
   background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
   padding: 16px; margin: 12px 0 8px; box-shadow: var(--shadow);
 }
-.ring { position: relative; width: 96px; height: 96px; flex: 0 0 auto; }
-.ring svg { width: 96px; height: 96px; transform: rotate(-90deg); }
-.ring-bg { fill: none; stroke: var(--panel-2); stroke-width: 11; }
-.ring-fg { fill: none; stroke: url(#ringGrad); stroke-width: 11; stroke-linecap: round; transition: stroke-dashoffset 0.6s cubic-bezier(0.3,0.9,0.3,1); }
-.ring-label { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
-.ring-label b { font-size: 1.45rem; font-weight: 800; line-height: 1; }
-.ring-label span { font-size: 0.58rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.ring { position: relative; width: 108px; height: 108px; flex: 0 0 auto; }
+.ring svg { width: 108px; height: 108px; transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: var(--panel-2); stroke-width: 9; }
+.ring-fg { fill: none; stroke: url(#ringGrad); stroke-width: 9; stroke-linecap: round; transition: stroke-dashoffset 0.6s cubic-bezier(0.3,0.9,0.3,1); }
+.ring-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; }
+.ring-label b { font-size: 1.3rem; font-weight: 800; line-height: 1; }
+.ring-label span { font-size: 0.52rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; line-height: 1; }
 .dash-stats { flex: 1; display: flex; justify-content: space-around; text-align: center; }
 .dash-stats .ds b { font-size: 1.35rem; font-weight: 800; display: block; line-height: 1.1; }
 .dash-stats .ds span { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
