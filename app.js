@@ -14,7 +14,7 @@
 
   // ---- State ---------------------------------------------------------------
   /** @type {Record<string, {have:boolean, dupes:number}>} */
-  let state = loadState();
+  let state = applySeed(loadState());
   let filter = "all";   // all | missing | dupes
   let query = "";
   let view = "album";   // album | trade
@@ -31,6 +31,22 @@
   }
   function getSt(num) {
     return state[num] || { have: false, dupes: 0 };
+  }
+
+  // First-run helper: pre-fill Have/Missing read from the album photos
+  // (window.SEED). Only fills stickers the user hasn't touched yet, so it
+  // never overwrites your own marks and new groups get seeded as they're added.
+  function applySeed(st) {
+    const seed = (typeof window !== "undefined" && window.SEED) || {};
+    let changed = false;
+    for (const num in seed) {
+      if (!(num in st)) {
+        st[num] = seed[num];
+        changed = true;
+      }
+    }
+    if (changed) localStorage.setItem(STORE_KEY, JSON.stringify(st));
+    return st;
   }
 
   // ---- Album helpers -------------------------------------------------------
