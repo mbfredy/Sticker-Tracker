@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f1216" />
+  <title>World Cup 2026 — Sticker Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <div class="title-row">
+      <h1 id="appTitle">World Cup 2026 — Sticker Tracker</h1>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label" id="progressLabel"></div>
+    </div>
+
+    <div class="controls">
+      <input id="search" class="search" type="search" placeholder="Search number, player or country…" />
+      <div class="filters">
+        <button class="chip-btn active" data-filter="all">All</button>
+        <button class="chip-btn" data-filter="missing">Missing</button>
+        <button class="chip-btn" data-filter="dupes">Spares</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-view="album">📖 Album</button>
+      <button class="tab" data-view="trade">🤝 Trade</button>
+    </div>
+  </header>
+
+  <nav class="group-nav" id="groupNav"></nav>
+
+  <main id="main"></main>
+
+  <div class="footer-actions">
+    <button id="exportBtn">⬇️ Backup</button>
+    <label for="importInput" style="flex:1">
+      <input id="importInput" type="file" accept="application/json" class="hidden" />
+      <span class="footer-import" style="display:block;text-align:center;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px;font-weight:600;font-size:0.82rem;cursor:pointer">⬆️ Restore</span>
+    </label>
+    <button id="resetBtn">♻️ Reset</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
