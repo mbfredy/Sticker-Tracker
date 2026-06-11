@@ -368,14 +368,14 @@
     ALL.forEach((s) => {
       const st = getSt(s.num);
       if (!st.have) need.push(label(s));
-      if (st.dupes > 0) spares.push(`${s.num} ×${st.dupes} — ${s.country}`);
+      if (st.dupes > 0) spares.push(`${s.flag || "🏳️"} ${s.num} ×${st.dupes}`);
     });
     elMain.appendChild(panel("🔎", `Stickers I need (${need.length})`,
       need.length ? need.join("\n") : "Nothing missing — album complete! 🎉", need.join("\n")));
     elMain.appendChild(panel("🔁", `My spares to trade (${spares.length})`,
       spares.length ? spares.join("\n") : "No duplicates yet. Tap a sticker, then + to log a spare.", spares.join("\n")));
   }
-  function label(s) { return `${s.num} — ${s.country}`; }
+  function label(s) { return `${s.flag || "🏳️"} ${s.num}`; }
 
   function panel(icon, title, text, copyText) {
     const el = document.createElement("div");
