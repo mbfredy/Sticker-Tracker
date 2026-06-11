@@ -53,7 +53,7 @@
   let filter = "all";       // all | missing | dupes
   let query = "";
   let view = "album";       // album | trade | compare
-  let compareMode = "have"; // friend's pasted list is what they HAVE or NEED
+  let compareMode = "need"; // friend's pasted list is what they HAVE or NEED
   let pressTimer = null;     // long-press timer for spares
   let suppressClickUntil = 0; // guard so a long-press doesn't also fire a tap
   const expandedTeams = new Set(); // which team rows the user has opened
@@ -398,8 +398,8 @@
     wrap.className = "panel";
     wrap.innerHTML =
       `<h2>🤝 Compare a friend's list</h2>` +
-      `<p class="hint">Paste your friend's sticker codes (any format — “mex12”, “MEX 12”, commas or new lines). ` +
-      `It compares against the collection in this app. Nothing they do here changes your album.</p>` +
+      `<p class="hint">Paste your friend's list (any format — “mex12”, “MEX 12”, commas or new lines) and choose what it is. ` +
+      `You'll see which of <b>your spares</b> you can give them — your single copies are never offered.</p>` +
       `<div class="mini-seg">` +
         `<button data-mode="have" class="${compareMode === "have" ? "active" : ""}">They HAVE these</button>` +
         `<button data-mode="need" class="${compareMode === "need" ? "active" : ""}">They NEED these</button>` +
@@ -435,30 +435,32 @@
       out.innerHTML = `<p class="hint" style="margin-top:14px">No recognizable sticker codes found yet.</p>`;
       return;
     }
-    const friendHas = (num) => compareMode === "have" ? friendSet.has(num) : !friendSet.has(num);
-    const youHave = (num) => getSt(num).have;
+    const needMode = compareMode === "need";
+    const friendNeeds = (num) => needMode ? friendSet.has(num) : !friendSet.has(num);
+    const friendHasIt = (num) => needMode ? !friendSet.has(num) : friendSet.has(num);
 
-    const canGet = [], canGive = [];
+    // You can only GIVE duplicates (dupes > 0) — never your single album copy.
+    const give = [];
+    const get = []; // they have it and you still need it (only knowable in HAVE mode)
     ALL.forEach((s) => {
-      if (friendHas(s.num) && !youHave(s.num)) canGet.push(s);
-      if (youHave(s.num) && !friendHas(s.num)) canGive.push(s);
+      const st = getSt(s.num);
+      if (st.dupes > 0 && friendNeeds(s.num)) give.push(label(s) + (st.dupes > 1 ? "  ×" + st.dupes : ""));
+      if (!needMode && friendHasIt(s.num) && !st.have) get.push(label(s));
     });
+    const giveText = give.join("\n");
+    const getText = get.join("\n");
 
-    const getText = canGet.map(label).join("\n");
-    const giveText = canGive.map(label).join("\n");
-
-    out.innerHTML =
-      `<div class="tally">` +
-        `<div class="tcard get"><div class="tnum">${canGet.length}</div><div class="tlbl">you can get</div></div>` +
-        `<div class="tcard give"><div class="tnum">${canGive.length}</div><div class="tlbl">you can give</div></div>` +
-      `</div>` +
+    let html = `<div class="tally">` +
+      `<div class="tcard give"><div class="tnum">${give.length}</div><div class="tlbl">spares you can give</div></div>`;
+    if (!needMode) html += `<div class="tcard get"><div class="tnum">${get.length}</div><div class="tlbl">you can get</div></div>`;
+    html += `</div>` +
       `<div class="panel" style="margin-top:0;box-shadow:none;padding:0">` +
-        block("⬇️", `They have, you're missing (${canGet.length})`, getText, "get") +
-        block("⬆️", `You have, they're missing (${canGive.length})`, giveText, "give") +
+      block("🎁", `Your spares they need (${give.length})`, giveText, "give") +
+      (needMode ? "" : block("📥", `They have, you're missing (${get.length})`, getText, "get")) +
       `</div>`;
-
-    bindCopy(out, "get", getText);
+    out.innerHTML = html;
     bindCopy(out, "give", giveText);
+    if (!needMode) bindCopy(out, "get", getText);
   }
   function block(icon, title, text, key) {
     const empty = !text;
